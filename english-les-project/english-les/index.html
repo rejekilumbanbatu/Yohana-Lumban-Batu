@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EnglishPro — Les Bahasa Inggris</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body class="landing-body">
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-brand">
+      <span class="brand-icon">✦</span>
+      <span class="brand-name">English<span class="brand-accent">Pro</span></span>
+    </div>
+    <div class="nav-links">
+      <a href="#features">Fitur</a>
+      <a href="#about">Tentang</a>
+      <a href="login.html" class="btn-nav-login">Masuk</a>
+      <a href="register.html" class="btn-nav-register">Daftar</a>
+    </div>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+      <i class="fas fa-bars"></i>
+    </button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-content">
+      <div class="hero-badge">🎓 Platform Les Bahasa Inggris SMA</div>
+      <h1 class="hero-title">
+        Belajar <em>English</em><br/>
+        Lebih Terstruktur &<br/>
+        <span class="hero-highlight">Terukur</span>
+      </h1>
+      <p class="hero-subtitle">
+        Pantau perkembangan belajar setiap pertemuan. Laporan rapi,
+        data akurat, progres nyata.
+      </p>
+      <div class="hero-cta">
+        <a href="register.html" class="btn-primary">Mulai Sekarang <i class="fas fa-arrow-right"></i></a>
+        <a href="login.html" class="btn-ghost">Sudah punya akun? Masuk</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card-mock">
+        <div class="mock-header">
+          <span class="mock-dot red"></span>
+          <span class="mock-dot yellow"></span>
+          <span class="mock-dot green"></span>
+          <span class="mock-title">Dashboard Laporan</span>
+        </div>
+        <div class="mock-stat-row">
+          <div class="mock-stat">
+            <div class="mock-stat-num">24</div>
+            <div class="mock-stat-label">Pertemuan</div>
+          </div>
+          <div class="mock-stat">
+            <div class="mock-stat-num">8</div>
+            <div class="mock-stat-label">Minggu Ini</div>
+          </div>
+          <div class="mock-stat">
+            <div class="mock-stat-num">3</div>
+            <div class="mock-stat-label">Murid</div>
+          </div>
+        </div>
+        <div class="mock-table">
+          <div class="mock-row header-row">
+            <span>No.</span><span>Tanggal</span><span>Materi</span>
+          </div>
+          <div class="mock-row"><span>1</span><span>2025-01-06</span><span>Grammar Dasar</span></div>
+          <div class="mock-row"><span>2</span><span>2025-01-08</span><span>Vocabulary</span></div>
+          <div class="mock-row"><span>3</span><span>2025-01-13</span><span>Reading</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="section-header">
+      <span class="section-tag">Fitur Unggulan</span>
+      <h2>Semua yang kamu butuhkan,<br/>dalam satu platform</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Laporan Terstruktur</h3>
+        <p>Catat setiap pertemuan dengan materi dan tanggal. Rapi, mudah dilacak.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3>Filter Mingguan</h3>
+        <p>Pilih rentang tanggal untuk melihat laporan spesifik setiap minggu.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📄</div>
+        <h3>Export PDF</h3>
+        <p>Cetak laporan langsung ke PDF yang rapi dengan satu klik.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔐</div>
+        <h3>Dua Role Pengguna</h3>
+        <p>Admin (guru) bisa kelola data, murid/ortu bisa pantau perkembangan.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about" id="about">
+    <div class="about-content">
+      <span class="section-tag">Tentang</span>
+      <h2>Platform sederhana,<br/>manfaat nyata</h2>
+      <p>Dibuat untuk guru les yang ingin mengelola laporan pembelajaran secara digital — tanpa ribet, tanpa biaya server.</p>
+      <a href="register.html" class="btn-primary">Coba Gratis →</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-brand">
+      <span class="brand-icon">✦</span>
+      <span class="brand-name">English<span class="brand-accent">Pro</span></span>
+    </div>
+    <p>© 2025 EnglishPro. Dibuat dengan ❤️ untuk dunia pendidikan.</p>
+  </footer>
+
+  <script src="js/script.js"></script>
+  <script>
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const navbar = document.getElementById('navbar');
+      navbar.classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // Hamburger menu
+    document.getElementById('navHamburger').addEventListener('click', () => {
+      document.querySelector('.nav-links').classList.toggle('open');
+    });
+
+    // Redirect if already logged in
+    const session = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+    if (session) window.location.href = 'dashboard.html';
+  </script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — EnglishPro</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body class="auth-body">
+
+  <div class="auth-container">
+
+    <!-- LEFT PANEL -->
+    <div class="auth-panel-left">
+      <a href="index.html" class="auth-back">
+        <i class="fas fa-arrow-left"></i> Kembali
+      </a>
+      <div class="auth-brand">
+        <span class="brand-icon-lg">✦</span>
+        <span class="auth-brand-name">English<em>Pro</em></span>
+      </div>
+      <blockquote class="auth-quote">
+        "The limits of my language mean the limits of my world."
+        <cite>— Ludwig Wittgenstein</cite>
+      </blockquote>
+      <div class="auth-panel-deco"></div>
+    </div>
+
+    <!-- RIGHT PANEL (Form) -->
+    <div class="auth-panel-right">
+      <div class="auth-form-wrap">
+        <h2 class="auth-title">Selamat Datang 👋</h2>
+        <p class="auth-subtitle">Masuk ke akun EnglishPro kamu</p>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast hidden"></div>
+
+        <form id="loginForm" novalidate>
+          <!-- Username -->
+          <div class="form-group">
+            <label for="username">Username</label>
+            <div class="input-wrap">
+              <i class="fas fa-user input-icon"></i>
+              <input
+                type="text"
+                id="username"
+                placeholder="Masukkan username"
+                autocomplete="username"
+              />
+            </div>
+            <span class="field-error" id="err-username"></span>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <i class="fas fa-lock input-icon"></i>
+              <input
+                type="password"
+                id="password"
+                placeholder="Masukkan password"
+                autocomplete="current-password"
+              />
+              <button type="button" class="toggle-pw" id="togglePw" aria-label="Tampilkan password">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+            <span class="field-error" id="err-password"></span>
+          </div>
+
+          <button type="submit" class="btn-submit" id="btnLogin">
+            <span class="btn-text">Masuk</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </form>
+
+        <p class="auth-switch">
+          Belum punya akun? <a href="register.html">Daftar sekarang</a>
+        </p>
+
+        
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/script.js"></script>
+  <script>
+    // Redirect if already logged in
+    const session = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+    if (session) window.location.href = 'dashboard.html';
+
+    // Toggle password visibility
+    document.getElementById('togglePw').addEventListener('click', function () {
+      const pw = document.getElementById('password');
+      const icon = this.querySelector('i');
+      if (pw.type === 'password') {
+        pw.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+      } else {
+        pw.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+      }
+    });
+
+    // Login form submission
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      clearErrors();
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      let valid = true;
+
+      if (!username) {
+        showFieldError('err-username', 'Username wajib diisi');
+        valid = false;
+      }
+      if (!password) {
+        showFieldError('err-password', 'Password wajib diisi');
+        valid = false;
+      }
+      if (!valid) return;
+
+      // Cek user di localStorage
+      const users = getUsers();
+      const user = users.find(u => u.username === username && u.password === password);
+
+      if (!user) {
+        showToast('Username atau password salah!', 'error');
+        return;
+      }
+
+      // Simpan sesi
+      sessionStorage.setItem('currentUser', JSON.stringify(user));
+      showToast('Login berhasil! Mengarahkan...', 'success');
+
+      const btn = document.getElementById('btnLogin');
+      btn.disabled = true;
+      btn.querySelector('.btn-text').textContent = 'Masuk...';
+
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — EnglishPro</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <!-- jsPDF + AutoTable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="dashboard-body">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">✦</span>
+      <span class="brand-name">English<span class="brand-accent">Pro</span></span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-link active" data-section="dashboard">
+        <i class="fas fa-home"></i> <span>Dashboard</span>
+      </a>
+      <a href="#" class="sidebar-link" data-section="laporan">
+        <i class="fas fa-table"></i> <span>Laporan</span>
+      </a>
+      <a href="#" class="sidebar-link" id="adminMenuLink" style="display:none" data-section="kelola">
+        <i class="fas fa-cog"></i> <span>Kelola Data</span>
+      </a>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="btn-darkmode" id="btnDarkMode" title="Toggle Dark Mode">
+        <i class="fas fa-moon"></i> <span>Dark Mode</span>
+      </button>
+      <button class="btn-logout" id="btnLogout">
+        <i class="fas fa-sign-out-alt"></i> <span>Keluar</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- OVERLAY (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <button class="topbar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-right">
+        <div class="topbar-user" id="topbarUser">
+          <div class="user-avatar" id="userAvatar">A</div>
+          <div class="user-info">
+            <span class="user-name" id="userName">Loading...</span>
+            <span class="user-role" id="userRole">—</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- TOAST -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- ======== SECTION: DASHBOARD ======== -->
+    <section class="section-page active" id="section-dashboard">
+      <div class="page-header">
+        <div>
+          <h1>Selamat Datang 👋</h1>
+          <p class="page-subtitle">Pantau dan kelola laporan pembelajaran Bahasa Inggris</p>
+        </div>
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="stats-grid">
+        <div class="stat-card stat-blue">
+          <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="statTotal">0</div>
+            <div class="stat-label">Total Pertemuan</div>
+          </div>
+        </div>
+        <div class="stat-card stat-green">
+          <div class="stat-icon"><i class="fas fa-calendar-week"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="statWeek">0</div>
+            <div class="stat-label">Minggu Ini</div>
+          </div>
+        </div>
+        <div class="stat-card stat-purple">
+          <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="statMonth">0</div>
+            <div class="stat-label">Bulan Ini</div>
+          </div>
+        </div>
+        <div class="stat-card stat-orange">
+          <div class="stat-icon"><i class="fas fa-book-open"></i></div>
+          <div class="stat-info">
+            <div class="stat-value" id="statLastMeet">—</div>
+            <div class="stat-label">Pertemuan Terakhir</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT TABLE PREVIEW -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-clock"></i> Pertemuan Terbaru</h2>
+          <button class="btn-text-link" onclick="navigateTo('laporan')">Lihat Semua →</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="recentTable">
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>Tanggal</th>
+                <th>Materi</th>
+              </tr>
+            </thead>
+            <tbody id="recentTbody">
+              <tr><td colspan="3" class="empty-row">Belum ada data pertemuan.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======== SECTION: LAPORAN ======== -->
+    <section class="section-page" id="section-laporan">
+      <div class="page-header">
+        <div>
+          <h1>Laporan Pembelajaran</h1>
+          <p class="page-subtitle">Laporan Pembelajaran Bahasa Inggris</p>
+        </div>
+        <div class="page-actions" id="adminActions" style="display:none">
+          <button class="btn-primary" id="btnTambah">
+            <i class="fas fa-plus"></i> Tambah Pertemuan
+          </button>
+        </div>
+      </div>
+
+      <!-- FILTER + EXPORT -->
+      <div class="card filter-card">
+        <div class="filter-row">
+          <div class="filter-group">
+            <label for="filterStart"><i class="fas fa-calendar"></i> Tanggal Mulai</label>
+            <input type="date" id="filterStart"/>
+          </div>
+          <div class="filter-group">
+            <label for="filterEnd"><i class="fas fa-calendar"></i> Tanggal Akhir</label>
+            <input type="date" id="filterEnd"/>
+          </div>
+          <div class="filter-buttons">
+            <button class="btn-filter" id="btnFilter">
+              <i class="fas fa-search"></i> Filter
+            </button>
+            <button class="btn-reset" id="btnReset">
+              <i class="fas fa-undo"></i> Reset
+            </button>
+            <button class="btn-export" id="btnExport">
+              <i class="fas fa-file-pdf"></i> Export PDF
+            </button>
+          </div>
+        </div>
+        <div class="filter-status" id="filterStatus"></div>
+      </div>
+
+      <!-- DATA TABLE -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-table"></i> Tabel Laporan</h2>
+          <span class="badge-count" id="rowCount">0 data</span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="laporanTable">
+            <thead>
+              <tr>
+                <th width="60">No.</th>
+                <th>Pertemuan</th>
+                <th>Tanggal</th>
+                <th>Materi</th>
+                <th id="actionHeader" style="display:none" width="140">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="laporanTbody">
+              <tr><td colspan="5" class="empty-row">Belum ada data. Tambahkan pertemuan pertama!</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======== SECTION: KELOLA (ADMIN ONLY) ======== -->
+    <section class="section-page" id="section-kelola">
+      <div class="page-header">
+        <div>
+          <h1>Kelola Data</h1>
+          <p class="page-subtitle">Tambah, edit, dan hapus data pertemuan</p>
+        </div>
+        <button class="btn-primary" id="btnTambah2">
+          <i class="fas fa-plus"></i> Tambah Pertemuan
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>Pertemuan</th>
+                <th>Tanggal</th>
+                <th>Materi</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="kelolaTbody">
+              <tr><td colspan="5" class="empty-row">Belum ada data.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======== MODAL: Tambah / Edit ======== -->
+  <div class="modal-overlay hidden" id="modalOverlay">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Tambah Pertemuan</h3>
+        <button class="modal-close" id="modalClose" aria-label="Tutup modal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="modalToast" class="toast hidden"></div>
+        <form id="meetingForm" novalidate>
+          <div class="form-group">
+            <label for="inputPertemuan">Nomor Pertemuan</label>
+            <div class="input-wrap">
+              <i class="fas fa-hashtag input-icon"></i>
+              <input type="number" id="inputPertemuan" min="1" placeholder="Contoh: 1"/>
+            </div>
+            <span class="field-error" id="err-pertemuan"></span>
+          </div>
+          <div class="form-group">
+            <label for="inputTanggal">Tanggal</label>
+            <div class="input-wrap">
+              <i class="fas fa-calendar input-icon"></i>
+              <input type="date" id="inputTanggal"/>
+            </div>
+            <span class="field-error" id="err-tanggal"></span>
+          </div>
+          <div class="form-group">
+            <label for="inputMateri">Materi</label>
+            <div class="input-wrap">
+              <i class="fas fa-book input-icon"></i>
+              <input type="text" id="inputMateri" placeholder="Contoh: Grammar - Present Tense"/>
+            </div>
+            <span class="field-error" id="err-materi"></span>
+          </div>
+          <input type="hidden" id="editId"/>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost-sm" id="btnCancel">Batal</button>
+        <button class="btn-primary" id="btnSave">
+          <i class="fas fa-save"></i> Simpan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== MODAL: Konfirmasi Hapus ======== -->
+  <div class="modal-overlay hidden" id="confirmOverlay">
+    <div class="modal modal-sm" id="confirmModal">
+      <div class="modal-header">
+        <h3>Konfirmasi Hapus</h3>
+        <button class="modal-close" id="confirmClose"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="confirm-icon">🗑️</div>
+        <p class="confirm-text">Yakin ingin menghapus data pertemuan ini? Tindakan ini tidak bisa dibatalkan.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost-sm" id="btnCancelDelete">Batal</button>
+        <button class="btn-danger" id="btnConfirmDelete">
+          <i class="fas fa-trash"></i> Ya, Hapus
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
+  <script>
+    // ================================================================
+    // DASHBOARD CONTROLLER
+    // ================================================================
+
+    // --- Auth Guard ---
+    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+    if (!currentUser) window.location.href = 'login.html';
+
+    const isAdmin = currentUser && currentUser.role === 'admin';
+
+    // --- Init UI based on role ---
+    function initUI() {
+      document.getElementById('userName').textContent = currentUser.fullname;
+      document.getElementById('userRole').textContent = isAdmin ? '👑 Admin' : '🎓 Murid/Ortu';
+      document.getElementById('userAvatar').textContent = currentUser.fullname.charAt(0).toUpperCase();
+
+      if (isAdmin) {
+        document.getElementById('adminMenuLink').style.display = '';
+        document.getElementById('adminActions').style.display = '';
+        document.getElementById('actionHeader').style.display = '';
+      }
+
+      // Apply dark mode if saved
+      if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark');
+        document.querySelector('#btnDarkMode i').classList.replace('fa-moon', 'fa-sun');
+        document.querySelector('#btnDarkMode span').textContent = 'Light Mode';
+      }
+    }
+
+    // --- Navigation ---
+    function navigateTo(section) {
+      document.querySelectorAll('.section-page').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      document.getElementById('section-' + section).classList.add('active');
+      document.querySelector(`[data-section="${section}"]`).classList.add('active');
+      document.getElementById('topbarTitle').textContent =
+        section === 'dashboard' ? 'Dashboard' :
+        section === 'laporan' ? 'Laporan Pembelajaran' : 'Kelola Data';
+
+      if (section === 'dashboard') updateDashboard();
+      if (section === 'laporan') renderLaporan(getLaporan());
+      if (section === 'kelola') renderKelola();
+
+      // Close sidebar on mobile
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('active');
+    }
+
+    document.querySelectorAll('.sidebar-link').forEach(link => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        navigateTo(this.dataset.section);
+      });
+    });
+
+    // --- Sidebar toggle (mobile) ---
+    document.getElementById('sidebarToggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('active');
+    });
+    document.getElementById('sidebarOverlay').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('active');
+    });
+
+    // --- Dark Mode ---
+    document.getElementById('btnDarkMode').addEventListener('click', function () {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      localStorage.setItem('darkMode', isDark);
+      const icon = this.querySelector('i');
+      const label = this.querySelector('span');
+      if (isDark) { icon.classList.replace('fa-moon', 'fa-sun'); label.textContent = 'Light Mode'; }
+      else { icon.classList.replace('fa-sun', 'fa-moon'); label.textContent = 'Dark Mode'; }
+    });
+
+    // --- Logout ---
+    document.getElementById('btnLogout').addEventListener('click', () => {
+      sessionStorage.removeItem('currentUser');
+      window.location.href = 'login.html';
+    });
+
+    // ================================================================
+    // DATA HELPERS
+    // ================================================================
+    function getLaporan() { return JSON.parse(localStorage.getItem('laporan') || '[]'); }
+    function saveLaporan(data) { localStorage.setItem('laporan', JSON.stringify(data)); }
+
+    function getWeekRange() {
+      const now = new Date();
+      const day = now.getDay();
+      const diffToMonday = (day === 0 ? -6 : 1 - day);
+      const monday = new Date(now); monday.setDate(now.getDate() + diffToMonday);
+      const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+      return { start: monday.toISOString().slice(0, 10), end: sunday.toISOString().slice(0, 10) };
+    }
+
+    function getMonthRange() {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
+      return { start, end };
+    }
+
+    function filterByDate(data, start, end) {
+      return data.filter(d => (!start || d.tanggal >= start) && (!end || d.tanggal <= end));
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('id-ID', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    // ================================================================
+    // DASHBOARD STATS
+    // ================================================================
+    function updateDashboard() {
+      const data = getLaporan();
+      const week = getWeekRange();
+      const month = getMonthRange();
+
+      document.getElementById('statTotal').textContent = data.length;
+      document.getElementById('statWeek').textContent = filterByDate(data, week.start, week.end).length;
+      document.getElementById('statMonth').textContent = filterByDate(data, month.start, month.end).length;
+
+      const sorted = [...data].sort((a, b) => b.tanggal.localeCompare(a.tanggal));
+      document.getElementById('statLastMeet').textContent = sorted[0] ? formatDate(sorted[0].tanggal) : '—';
+
+      // Recent table (last 5)
+      const recent = sorted.slice(0, 5);
+      const tbody = document.getElementById('recentTbody');
+      if (recent.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="empty-row">Belum ada data pertemuan.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = recent.map((row, i) => `
+        <tr>
+          <td><span class="badge-num">${i + 1}</span></td>
+          <td>${formatDate(row.tanggal)}</td>
+          <td>${escapeHtml(row.materi)}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ================================================================
+    // RENDER LAPORAN TABLE
+    // ================================================================
+    let currentFiltered = [];
+
+    function renderLaporan(data) {
+      currentFiltered = data;
+      const sorted = [...data].sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+      const tbody = document.getElementById('laporanTbody');
+      document.getElementById('rowCount').textContent = sorted.length + ' data';
+
+      if (sorted.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-row">Tidak ada data untuk ditampilkan.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = sorted.map((row, i) => `
+        <tr>
+          <td><span class="badge-num">${i + 1}</span></td>
+          <td><strong>${escapeHtml(String(row.pertemuan))}</strong></td>
+          <td>${formatDate(row.tanggal)}</td>
+          <td>${escapeHtml(row.materi)}</td>
+          ${isAdmin ? `
+          <td>
+            <div class="action-btns">
+              <button class="btn-edit" onclick="openEdit('${row.id}')"><i class="fas fa-edit"></i></button>
+              <button class="btn-delete" onclick="openDelete('${row.id}')"><i class="fas fa-trash"></i></button>
+            </div>
+          </td>` : '<td style="display:none"></td>'}
+        </tr>
+      `).join('');
+    }
+
+    // ================================================================
+    // RENDER KELOLA TABLE (admin only)
+    // ================================================================
+    function renderKelola() {
+      const data = getLaporan();
+      const sorted = [...data].sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+      const tbody = document.getElementById('kelolaTbody');
+
+      if (sorted.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-row">Belum ada data.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = sorted.map((row, i) => `
+        <tr>
+          <td><span class="badge-num">${i + 1}</span></td>
+          <td><strong>${escapeHtml(String(row.pertemuan))}</strong></td>
+          <td>${formatDate(row.tanggal)}</td>
+          <td>${escapeHtml(row.materi)}</td>
+          <td>
+            <div class="action-btns">
+              <button class="btn-edit" onclick="openEdit('${row.id}')"><i class="fas fa-edit"></i> Edit</button>
+              <button class="btn-delete" onclick="openDelete('${row.id}')"><i class="fas fa-trash"></i> Hapus</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // ================================================================
+    // FILTER
+    // ================================================================
+    document.getElementById('btnFilter').addEventListener('click', () => {
+      const start = document.getElementById('filterStart').value;
+      const end = document.getElementById('filterEnd').value;
+
+      if (start && end && start > end) {
+        showToast('Tanggal mulai tidak boleh lebih dari tanggal akhir!', 'error');
+        return;
+      }
+
+      const data = getLaporan();
+      const filtered = filterByDate(data, start, end);
+      renderLaporan(filtered);
+
+      const status = document.getElementById('filterStatus');
+      if (start || end) {
+        status.textContent = `Menampilkan ${filtered.length} data dari ${start || '—'} hingga ${end || '—'}`;
+        status.style.display = 'block';
+      }
+    });
+
+    document.getElementById('btnReset').addEventListener('click', () => {
+      document.getElementById('filterStart').value = '';
+      document.getElementById('filterEnd').value = '';
+      document.getElementById('filterStatus').style.display = 'none';
+      renderLaporan(getLaporan());
+    });
+
+    // ================================================================
+    // EXPORT PDF
+    // ================================================================
+    document.getElementById('btnExport').addEventListener('click', () => {
+      if (currentFiltered.length === 0) {
+        showToast('Tidak ada data untuk di-export!', 'error');
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      // Header PDF
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(18);
+      doc.setTextColor(30, 30, 80);
+      doc.text('Laporan Pembelajaran Bahasa Inggris', 105, 18, { align: 'center' });
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 100, 100);
+      const start = document.getElementById('filterStart').value;
+      const end = document.getElementById('filterEnd').value;
+      const periodeText = (start || end)
+        ? `Periode: ${start || '—'} s/d ${end || '—'}`
+        : 'Periode: Semua Data';
+      doc.text(periodeText, 105, 26, { align: 'center' });
+      doc.text(`Dicetak: ${new Date().toLocaleDateString('id-ID', {dateStyle:'long'})}`, 105, 32, { align: 'center' });
+
+      // Divider
+      doc.setDrawColor(200, 200, 220);
+      doc.line(14, 36, 196, 36);
+
+      // Sorted data
+      const sorted = [...currentFiltered].sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+
+      // AutoTable
+      doc.autoTable({
+        startY: 42,
+        head: [['No.', 'Pertemuan', 'Tanggal', 'Materi']],
+        body: sorted.map((row, i) => [
+          i + 1,
+          row.pertemuan,
+          formatDate(row.tanggal),
+          row.materi
+        ]),
+        headStyles: {
+          fillColor: [37, 49, 138],
+          textColor: 255,
+          fontStyle: 'bold',
+          halign: 'center'
+        },
+        bodyStyles: { fontSize: 10 },
+        alternateRowStyles: { fillColor: [245, 246, 255] },
+        columnStyles: {
+          0: { halign: 'center', cellWidth: 12 },
+          1: { halign: 'center', cellWidth: 28 },
+          2: { cellWidth: 52 },
+          3: { cellWidth: 'auto' }
+        },
+        styles: { font: 'helvetica', cellPadding: 4 },
+        margin: { left: 14, right: 14 }
+      });
+
+      // Footer
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(`EnglishPro — Halaman ${i} dari ${pageCount}`, 105, doc.internal.pageSize.height - 8, { align: 'center' });
+      }
+
+      doc.save('laporan-mingguan.pdf');
+      showToast('PDF berhasil diunduh!', 'success');
+    });
+
+    // ================================================================
+    // MODAL CRUD
+    // ================================================================
+    let deleteTargetId = null;
+
+    function openModal(mode, id) {
+      clearErrors();
+      document.getElementById('modalOverlay').classList.remove('hidden');
+      document.getElementById('modalTitle').textContent = mode === 'add' ? 'Tambah Pertemuan' : 'Edit Pertemuan';
+      document.getElementById('editId').value = '';
+      document.getElementById('inputPertemuan').value = '';
+      document.getElementById('inputTanggal').value = '';
+      document.getElementById('inputMateri').value = '';
+
+      if (mode === 'edit' && id) {
+        const data = getLaporan();
+        const row = data.find(d => d.id === id);
+        if (row) {
+          document.getElementById('editId').value = row.id;
+          document.getElementById('inputPertemuan').value = row.pertemuan;
+          document.getElementById('inputTanggal').value = row.tanggal;
+          document.getElementById('inputMateri').value = row.materi;
+        }
+      } else {
+        // Auto-suggest next meeting number
+        const data = getLaporan();
+        const max = data.reduce((m, d) => Math.max(m, Number(d.pertemuan) || 0), 0);
+        document.getElementById('inputPertemuan').value = max + 1;
+        document.getElementById('inputTanggal').value = new Date().toISOString().slice(0, 10);
+      }
+    }
+
+    function openEdit(id) { openModal('edit', id); }
+    function openDelete(id) {
+      deleteTargetId = id;
+      document.getElementById('confirmOverlay').classList.remove('hidden');
+    }
+
+    // Close modal
+    ['modalClose', 'btnCancel'].forEach(id => {
+      document.getElementById(id).addEventListener('click', () => {
+        document.getElementById('modalOverlay').classList.add('hidden');
+      });
+    });
+    ['confirmClose', 'btnCancelDelete'].forEach(id => {
+      document.getElementById(id).addEventListener('click', () => {
+        document.getElementById('confirmOverlay').classList.add('hidden');
+        deleteTargetId = null;
+      });
+    });
+
+    // Click outside modal to close
+    document.getElementById('modalOverlay').addEventListener('click', function (e) {
+      if (e.target === this) this.classList.add('hidden');
+    });
+    document.getElementById('confirmOverlay').addEventListener('click', function (e) {
+      if (e.target === this) {
+        this.classList.add('hidden');
+        deleteTargetId = null;
+      }
+    });
+
+    // Tambah buttons
+    ['btnTambah', 'btnTambah2'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('click', () => openModal('add'));
+    });
+
+    // Save
+    document.getElementById('btnSave').addEventListener('click', () => {
+      clearErrors();
+      const pertemuan = document.getElementById('inputPertemuan').value.trim();
+      const tanggal = document.getElementById('inputTanggal').value;
+      const materi = document.getElementById('inputMateri').value.trim();
+      const editId = document.getElementById('editId').value;
+      let valid = true;
+
+      if (!pertemuan || isNaN(pertemuan) || Number(pertemuan) < 1) {
+        showFieldError('err-pertemuan', 'Nomor pertemuan wajib diisi (angka > 0)'); valid = false;
+      }
+      if (!tanggal) { showFieldError('err-tanggal', 'Tanggal wajib diisi'); valid = false; }
+      if (!materi) { showFieldError('err-materi', 'Materi wajib diisi'); valid = false; }
+      if (!valid) return;
+
+      const data = getLaporan();
+      if (editId) {
+        // Edit existing
+        const idx = data.findIndex(d => d.id === editId);
+        if (idx !== -1) { data[idx] = { ...data[idx], pertemuan: Number(pertemuan), tanggal, materi }; }
+        showToast('Data berhasil diperbarui!', 'success');
+      } else {
+        // Add new
+        data.push({ id: String(Date.now()), pertemuan: Number(pertemuan), tanggal, materi });
+        showToast('Data berhasil ditambahkan!', 'success');
+      }
+      saveLaporan(data);
+      document.getElementById('modalOverlay').classList.add('hidden');
+      renderLaporan(getLaporan());
+      renderKelola();
+      updateDashboard();
+    });
+
+    // Confirm delete
+    document.getElementById('btnConfirmDelete').addEventListener('click', () => {
+      if (!deleteTargetId) return;
+      const data = getLaporan().filter(d => d.id !== deleteTargetId);
+      saveLaporan(data);
+      document.getElementById('confirmOverlay').classList.add('hidden');
+      deleteTargetId = null;
+      renderLaporan(getLaporan());
+      renderKelola();
+      updateDashboard();
+      showToast('Data berhasil dihapus!', 'success');
+    });
+
+    // ================================================================
+    // INIT
+    // ================================================================
+    initUI();
+    updateDashboard();
+    renderLaporan(getLaporan());
+    if (isAdmin) renderKelola();
+
+    // Helper: escape HTML to prevent XSS
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>
